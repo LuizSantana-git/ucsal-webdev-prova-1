@@ -17,8 +17,8 @@ public class AulaDto {
 
 	public AulaDto(Aula aula) {
 		this.id = Long.toString(aula.getId());
-		this.disciplina = this.geraNomeDisc(aula.getCodDisciplina());
-		this.codDisciplina = Integer.toString(DisciplinaEnum.getDiscByNome(this.disciplina).getCodigo());
+		this.disciplina = geraNomeDisc(aula.getCodDisciplina());
+		this.codDisciplina = Integer.toString(aula.getCodDisciplina());
 		this.assunto = aula.getAssunto();
 		this.duracao = Integer.toString(aula.getDuracao());
 		this.data = this.formataData(aula.getData());

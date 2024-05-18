@@ -1,10 +1,7 @@
 package enums;
 
 public enum DisciplinaEnum {
-	CALCULO(1, "CÁLCULO"),
-	LOGICA(2, "LÓGICA"),
-	GEOMETRIA(3, "GEOMETRIA"),
-	FISICA(4, "FÍSICA"),
+	CALCULO(1, "CÁLCULO"), LOGICA(2, "LÓGICA"), GEOMETRIA(3, "GEOMETRIA"), FISICA(4, "FÍSICA"),
 	COMPILADORES(5, "COMPILADORES");
 
 	private int codigo;

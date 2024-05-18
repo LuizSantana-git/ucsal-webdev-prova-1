@@ -1,5 +1,9 @@
 package controller;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
+import db.Db;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -8,11 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.AulaDto;
-
-import java.io.IOException;
-import java.util.ArrayList;
-
-import db.Db;
 
 @WebServlet(urlPatterns = { "/prova1", "/nova", "/edit" })
 public class ControllerServlet extends HttpServlet {
@@ -23,13 +22,13 @@ public class ControllerServlet extends HttpServlet {
 	}
 
 	/*
-	 * 	Este método é responsável pelo roteamento do projeto.
-	 * 	Se você fez alguma alteração no nome do projeto, isso pode
-	 * 	causar impacto aqui e talvez você precise ajustar alguns parâmetros.
-	 * 	IMPORTANTE: no caso da rota 'edit', o AJAX envia um parâmetro (via GET) que
-	 * 				identifica um id. Isso terá um impacto essencial na página edit.jsp.
-	 * 				Lá, você precisará recuperar esse valor.
+	 * Este método é responsável pelo roteamento do projeto. Se você fez alguma
+	 * alteração no nome do projeto, isso pode causar impacto aqui e talvez você
+	 * precise ajustar alguns parâmetros. IMPORTANTE: no caso da rota 'edit', o AJAX
+	 * envia um parâmetro (via GET) que identifica um id. Isso terá um impacto
+	 * essencial na página edit.jsp. Lá, você precisará recuperar esse valor.
 	 */
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String action = request.getServletPath();
@@ -47,6 +46,7 @@ public class ControllerServlet extends HttpServlet {
 		}
 	}
 
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		HttpSession session = request.getSession();
@@ -75,41 +75,71 @@ public class ControllerServlet extends HttpServlet {
 
 	private void poeDadosNaSessao(HttpSession session) {
 		/*
-		 *  Aqui, você consulta o banco de dados obtendo uma instância da classe
-		 *  (singleton) Db. Com ela, você pode obter uma lista com todos os dto's contendo
-		 *  os contatos no banco de dados.
-		 *  Aqui, você inclui essa lista na sessão.
+		 * Aqui, você consulta o banco de dados obtendo uma instância da classe
+		 * (singleton) Db. Com ela, você pode obter uma lista com todos os dto's
+		 * contendo os contatos no banco de dados. Aqui, você inclui essa lista na
+		 * sessão.
 		 */
+
+		// L aqui eu instancio o objeto, crio um objeto arrayList e atribuo ao metodo
+		// findall do db.
+		// L finalmente, eu insiro os dados resgatados pelo find all na sessão no
+		// atributo aulas.
+		Db db = Db.getInstance();
+		ArrayList<AulaDto> aulas = db.findAll();
+		session.setAttribute("aulas", aulas);
 	}
 
 	private void reset() {
 		/*
-		 * 	Aqui, você restaura os valores default no banco de dados (para efeito de testes)
+		 * Aqui, você restaura os valores default no banco de dados (para efeito de
+		 * testes)
 		 */
+		// L aqui lembrando que o metodo reset ja tem os dtos todos preparados.
+		Db db = Db.getInstance();
+		db.reset();
 	}
 
 	private void create(HttpServletRequest request) {
 		/*
-		 * 	Primeiro, você recupera (de request) os parâmetros enviados via AJAX, que são:
-		 * 	- codDisciplina,
-		 * 	- assunto,
-		 * 	- duracao,
-		 * 	- data,
-		 * 	- horario
-		 * 	Então, você cria um dto contendo esses dados e o invia ao banco de dados.
+		 * Primeiro, você recupera (de request) os parâmetros enviados via AJAX, que
+		 * são: - codDisciplina, - assunto, - duracao, - data, - horario Então, você
+		 * cria um dto contendo esses dados e o invia ao banco de dados.
 		 */
+
+		String codDisciplina = request.getParameter("codDisciplina");
+		String assunto = request.getParameter("assunto");
+		String duracao = request.getParameter("duracao");
+		String data = request.getParameter("data");
+		String horario = request.getParameter("horario");
+
+		AulaDto dto = new AulaDto();
+		dto.codDisciplina = codDisciplina;
+		dto.assunto = assunto;
+		dto.duracao = duracao;
+		dto.data = data;
+		dto.horario = horario;
+
+		Db db = Db.getInstance();
+		db.create(dto);
+
 	}
 
 	private void delete(HttpServletRequest request) {
 		/*
-		 * 	Recupere (de request) o parâmetro id e o use para remover a aula do banco de dados.
+		 * Recupere (de request) o parâmetro id e o use para remover a aula do banco de
+		 * dados.
 		 */
+
+		String id = request.getParameter("id");
+		Db db = Db.getInstance();
+		db.delete(id);
 	}
 
 	private void getAula(HttpServletRequest request, HttpServletResponse response) {
 		/*
-		 *  Este método recupera um dto a partir do parâmetro id.
-		 *  Em seguida, cria um json 'manualmente' e o envia como resposta da requisição.
+		 * Este método recupera um dto a partir do parâmetro id. Em seguida, cria um
+		 * json 'manualmente' e o envia como resposta da requisição.
 		 */
 		String id = request.getParameter("id");
 		Db db = Db.getInstance();
@@ -128,33 +158,31 @@ public class ControllerServlet extends HttpServlet {
 			// TODO: o que fazer de deu errado
 		}
 	}
-	
+
 	private void update(HttpServletRequest request) {
 		/*
-		 * 	Este método faz atualização do registro de uma aula.
-		 * 	Primeiro, recupere (de request) os parâmetros enviados:
-		 * 	- id
-		 * 	- codDisciplina,
-		 * 	- assunto,
-		 * 	- duracao,
-		 * 	- data,
-		 * 	- horario
-		 * 	Depois crie um dto com eles, e o envie ao banco de dados.
+		 * Este método faz atualização do registro de uma aula. Primeiro, recupere (de
+		 * request) os parâmetros enviados: - id - codDisciplina, - assunto, - duracao,
+		 * - data, - horario Depois crie um dto com eles, e o envie ao banco de dados.
 		 */
+
+		String id = request.getParameter("id");
+		String codDisciplina = request.getParameter("codDisciplina");
+		String assunto = request.getParameter("assunto");
+		String duracao = request.getParameter("duracao");
+		String data = request.getParameter("data");
+		String horario = request.getParameter("horario");
+
+		AulaDto dto = new AulaDto();
+		dto.id = id;
+		dto.codDisciplina = codDisciplina;
+		dto.assunto = assunto;
+		dto.duracao = duracao;
+		dto.data = data;
+		dto.horario = horario;
+
+		Db db = Db.getInstance();
+		db.update(dto);
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
